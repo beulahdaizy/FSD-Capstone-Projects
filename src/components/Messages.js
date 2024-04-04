@@ -1,5 +1,6 @@
 import { doc, onSnapshot } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
 import { db } from "../firebase";
 import Message from "./Message";
@@ -7,6 +8,7 @@ import Message from "./Message";
 const Messages = () => {
   const [messages, setMessages] = useState([]);
   const { data } = useContext(ChatContext);
+  const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     const unSub = onSnapshot(doc(db, "chats", data.chatId), (doc) => {
@@ -22,8 +24,12 @@ const Messages = () => {
 
   return (
     <div className="messages">
-      {messages.map((m) => (
-        <Message message={m} key={m.id} />
+      {messages.map((message) => (
+        <Message
+          key={message.id}
+          message={message}
+          isCurrentUser={message.senderId === currentUser.uid}
+        />
       ))}
     </div>
   );

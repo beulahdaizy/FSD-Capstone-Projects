@@ -1,10 +1,45 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import Messages from "./Messages";
 import Input from "./Input";
 import { ChatContext } from "../context/ChatContext";
+import "../styles/chat.css";
+import { useNavigate } from "react-router-dom";
 
 const Chat = () => {
   const { data } = useContext(ChatContext);
+  const [showProfileOption, setShowProfileOption] = useState(false);
+  const navigate = useNavigate();
+  const profileOptionRef = useRef(null);
+
+  const handleProfileOptionClick = () => {
+    navigate("/profile");
+  };
+
+  const handleOptionClick = (option) => {
+    if (option === "profile") {
+      setShowProfileOption(!showProfileOption);
+    } else if (option === "clear") {
+      // Implement chat clear functionality here
+      console.log("Clear chat clicked");
+    }
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        profileOptionRef.current &&
+        !profileOptionRef.current.contains(event.target)
+      ) {
+        setShowProfileOption(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   return (
     <div className="chat">
@@ -42,9 +77,15 @@ const Chat = () => {
             fill="currentColor"
             class="bi bi-three-dots"
             viewBox="0 0 16 16"
+            onClick={() => handleOptionClick("profile")}
           >
             <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3" />
           </svg>
+          {showProfileOption && (
+            <div className="profileOptionBox" ref={profileOptionRef}>
+              <div onClick={handleProfileOptionClick}>My Profile</div>
+            </div>
+          )}
         </div>
       </div>
       <Messages />

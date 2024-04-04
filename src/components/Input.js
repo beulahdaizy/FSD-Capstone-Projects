@@ -26,8 +26,13 @@ const Input = () => {
       const uploadTask = uploadBytesResumable(storageRef, img);
 
       uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // Handle upload progress if needed
+        },
         (error) => {
-          //TODO:Handle Error
+          // Handle upload error
+          console.error(error);
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
@@ -40,10 +45,14 @@ const Input = () => {
                 img: downloadURL,
               }),
             });
+            // Clear input fields after sending
+            setText("");
+            setImg(null);
           });
         }
       );
     } else {
+      // If no image, just send text message
       await updateDoc(doc(db, "chats", data.chatId), {
         messages: arrayUnion({
           id: uuid(),
@@ -52,8 +61,11 @@ const Input = () => {
           date: Timestamp.now(),
         }),
       });
+      // Clear input field after sending
+      setText("");
     }
 
+    // Update last message and date for both users
     await updateDoc(doc(db, "userChats", currentUser.uid), {
       [data.chatId + ".lastMessage"]: {
         text,
@@ -67,9 +79,6 @@ const Input = () => {
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });
-
-    setText("");
-    setImg(null);
   };
 
   return (
